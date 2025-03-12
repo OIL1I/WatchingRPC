@@ -5,7 +5,8 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:WatchingRPC"
         mc:Ignorable="d"
-        Title="Watching RPC" Height="450" Width="800">
+        Title="Watching RPC" Height="450" Width="800"
+        Closed="MainWindow_OnClosed">
     <Grid>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="1*" />
@@ -27,8 +28,7 @@
         <DockPanel Grid.Column="1" Grid.Row="0">
             <ComboBox DockPanel.Dock="Top" x:Name="cbox_caption" Height="30" Margin="15"
                       SelectionChanged="Cbox_caption_OnSelectionChanged" />
-            <ListView x:Name="lview_detail" VerticalAlignment="Stretch" Margin="15, 5, 15, 15"
-                      SelectionChanged="Lview_detail_OnSelectionChanged" />
+            <ListView x:Name="lview_detail" VerticalAlignment="Stretch" Margin="15, 5, 15, 15"/>
         </DockPanel>
         <Button Grid.Column="1" Grid.Row="1" x:Name="btn_update_rpc" Content="Update Discord Presence"
                 Margin="15, 15, 15, 5" Click="Btn_update_rpc_OnClick" />

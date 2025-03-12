@@ -14,6 +14,9 @@ using System.Net;
 using System.Text.Json;
 using NetDiscordRpc;
 using NetDiscordRpc.Core.Logger;
+using NetDiscordRpc.RPC;
+using Newtonsoft.Json;
+using Button = NetDiscordRpc.RPC.Button;
 using Path = System.IO.Path;
 
 namespace WatchingRPC;
@@ -26,6 +29,7 @@ public partial class MainWindow : Window
     private bool firstlaunch;
     private string rpcId;
     private string entryDir;
+    private WJsonEntry currentEntry;
 
     public MainWindow()
     {
@@ -103,12 +107,30 @@ public partial class MainWindow : Window
 
     private void Lview_entries_OnSelectionChanged(object sender, SelectionChangedEventArgs e)
     {
-        throw new NotImplementedException();
+        cbox_caption.Items.Clear();
+        lview_detail.Items.Clear();
+
+        var fs = new FileStream(entryDir + "\\" + lview_entries.SelectedItem + ".json", FileMode.Open);
+        StreamReader r = new StreamReader(fs);
+
+        var entryString = r.ReadToEnd();
+        currentEntry = JsonConvert.DeserializeObject<WJsonEntry>(entryString);
+        r.Close();
+        fs.Dispose();
+        
+        foreach (var caption in currentEntry.Captions)
+        {
+            cbox_caption.Items.Add(caption.Caption);
+        }
+
+        cbox_caption.SelectedIndex = 0;
     }
 
     private void Btn_update_lview_OnClick(object sender, RoutedEventArgs e)
     {
         lview_entries.Items.Clear();
+        cbox_caption.Items.Clear();
+        lview_detail.Items.Clear();
         
         foreach (var file in Directory.GetFiles(entryDir, "*.json").Select(Path.GetFileNameWithoutExtension))
         {
@@ -123,21 +145,34 @@ public partial class MainWindow : Window
 
     private void Cbox_caption_OnSelectionChanged(object sender, SelectionChangedEventArgs e)
     {
-        throw new NotImplementedException();
-    }
-
-    private void Lview_detail_OnSelectionChanged(object sender, SelectionChangedEventArgs e)
-    {
-        throw new NotImplementedException();
+        lview_detail.Items.Clear();
+        var index = cbox_caption.SelectedIndex;
+        
+        foreach (var detail in currentEntry.Captions[index].Details)
+        {
+            lview_detail.Items.Add(detail);
+        }
     }
 
     private void Btn_update_rpc_OnClick(object sender, RoutedEventArgs e)
     {
-        throw new NotImplementedException();
+        discordRpc.SetPresence(new RichPresence()
+        {
+            Details = $"Watching {lview_entries.SelectedItem} {cbox_caption.SelectedItem}",
+            State = lview_detail.SelectedItem.ToString(),
+            Buttons = new Button[] { new Button() { Label = "Get the App", Url = "https://github.com/OIL1I/WatchingRPC" } }
+        });
+        discordRpc.Invoke();
     }
 
     private void Btn_help_OnClick(object sender, RoutedEventArgs e)
     {
         throw new NotImplementedException();
+    }
+
+    private void MainWindow_OnClosed(object? sender, EventArgs e)
+    {
+        discordRpc.ClearPresence();
+        discordRpc.Dispose();
     }
 }
