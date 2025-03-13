@@ -9,6 +9,7 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 using System.Configuration;
+using System.Diagnostics;
 using System.IO;
 using System.Net;
 using System.Text.Json;
@@ -29,6 +30,8 @@ public partial class MainWindow : Window
     private bool firstlaunch;
     private string rpcId;
     private string entryDir;
+    private string jsonEntryUri;
+    private string helpUri;
     private WJsonEntry currentEntry;
 
     public MainWindow()
@@ -68,11 +71,23 @@ public partial class MainWindow : Window
         }
 
         rpcId = ConfigurationManager.AppSettings["RPC_CLIENT_ID"];
+        jsonEntryUri = ConfigurationManager.AppSettings["JSON_ENTRY_URI"];
+        helpUri = ConfigurationManager.AppSettings["HELP_URI"];
         var relativeEntryDir = ConfigurationManager.AppSettings["RELATIVE_ENTRY_DIR"];
 
         if (string.IsNullOrEmpty(rpcId))
         {
             throw new WatchingRPC.ConfigurationException("App.config: The app's RPC client ID is missing.");
+        }
+
+        if (string.IsNullOrEmpty(jsonEntryUri))
+        {
+            throw new WatchingRPC.ConfigurationException("App.config: The app's JSON entry URI is missing.");
+        }
+
+        if (string.IsNullOrEmpty(helpUri))
+        {
+            throw new WatchingRPC.ConfigurationException("App.config: The app's help URI is missing.");
         }
 
         if (string.IsNullOrEmpty(relativeEntryDir))
@@ -141,7 +156,8 @@ public partial class MainWindow : Window
 
     private void Btn_get_entries_OnClick(object sender, RoutedEventArgs e)
     {
-        throw new NotImplementedException();
+        
+        Process.Start(new ProcessStartInfo(jsonEntryUri) {UseShellExecute = true});
     }
 
     private void Cbox_caption_OnSelectionChanged(object sender, SelectionChangedEventArgs e)
@@ -171,7 +187,7 @@ public partial class MainWindow : Window
 
     private void Btn_help_OnClick(object sender, RoutedEventArgs e)
     {
-        throw new NotImplementedException();
+        Process.Start(new ProcessStartInfo(helpUri) {UseShellExecute = true});
     }
 
     private void MainWindow_OnClosed(object? sender, EventArgs e)
