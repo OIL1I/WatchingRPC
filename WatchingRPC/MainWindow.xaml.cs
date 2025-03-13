@@ -107,8 +107,9 @@ public partial class MainWindow : Window
 
     private void Lview_entries_OnSelectionChanged(object sender, SelectionChangedEventArgs e)
     {
-        cbox_caption.Items.Clear();
+        cbox_caption.SelectedIndex = -1;
         lview_detail.Items.Clear();
+        cbox_caption.Items.Clear();
 
         var fs = new FileStream(entryDir + "\\" + lview_entries.SelectedItem + ".json", FileMode.Open);
         StreamReader r = new StreamReader(fs);
@@ -145,6 +146,8 @@ public partial class MainWindow : Window
 
     private void Cbox_caption_OnSelectionChanged(object sender, SelectionChangedEventArgs e)
     {
+        if (cbox_caption.Items.Count == 0 | cbox_caption.SelectedIndex < 0) return;
+        
         lview_detail.Items.Clear();
         var index = cbox_caption.SelectedIndex;
         
@@ -160,6 +163,7 @@ public partial class MainWindow : Window
         {
             Details = $"Watching {lview_entries.SelectedItem} {cbox_caption.SelectedItem}",
             State = lview_detail.SelectedItem.ToString(),
+            Assets = new Assets() { LargeImageKey = "large_image" },
             Buttons = new Button[] { new Button() { Label = "Get the App", Url = "https://github.com/OIL1I/WatchingRPC" } }
         });
         discordRpc.Invoke();
