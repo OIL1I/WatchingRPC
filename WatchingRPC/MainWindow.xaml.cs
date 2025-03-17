@@ -18,12 +18,14 @@ using NetDiscordRpc.Core.Logger;
 using NetDiscordRpc.RPC;
 using Newtonsoft.Json;
 using Button = NetDiscordRpc.RPC.Button;
+using Configuration = System.Configuration.Configuration;
 using Path = System.IO.Path;
 
 namespace WatchingRPC;
 
 public partial class MainWindow : Window
 {
+    private Configuration config;
     private DiscordRPC discordRpc;
     private int windowHeight;
     private int windowWidth;
@@ -61,19 +63,20 @@ public partial class MainWindow : Window
     {
         try
         {
-            windowHeight = int.Parse(ConfigurationManager.AppSettings["HEIGHT"]);
-            windowWidth = int.Parse(ConfigurationManager.AppSettings["WIDTH"]);
-            firstlaunch = bool.Parse(ConfigurationManager.AppSettings["FIRST_LAUNCH"]);
+            config = ConfigurationManager.OpenExeConfiguration(ConfigurationUserLevel.None);
+            windowHeight = int.Parse(config.AppSettings.Settings["HEIGHT"].Value);
+            windowWidth = int.Parse(config.AppSettings.Settings["WIDTH"].Value);
+            firstlaunch = bool.Parse(config.AppSettings.Settings["FIRST_LAUNCH"].Value);
         }
         catch (NullReferenceException nullex)
         {
             throw new WatchingRPC.ConfigurationException("App.config is missing a value.", nullex);
         }
 
-        rpcId = ConfigurationManager.AppSettings["RPC_CLIENT_ID"];
-        jsonEntryUri = ConfigurationManager.AppSettings["JSON_ENTRY_URI"];
-        helpUri = ConfigurationManager.AppSettings["HELP_URI"];
-        var relativeEntryDir = ConfigurationManager.AppSettings["RELATIVE_ENTRY_DIR"];
+        rpcId = config.AppSettings.Settings["RPC_CLIENT_ID"].Value;
+        jsonEntryUri = config.AppSettings.Settings["JSON_ENTRY_URI"].Value;
+        helpUri = config.AppSettings.Settings["HELP_URI"].Value;
+        var relativeEntryDir = config.AppSettings.Settings["RELATIVE_ENTRY_DIR"].Value;
 
         if (string.IsNullOrEmpty(rpcId))
         {
@@ -103,7 +106,10 @@ public partial class MainWindow : Window
         if (firstlaunch)
         {
             MessageBox.Show("This is the first launch of the app. \nTo get help using this program, click on the \"Get Help\" button or got to https://github.com/OIL1I/WatchingRPC/wiki", "First Launch", MessageBoxButton.OK, MessageBoxImage.Information);
-            ConfigurationManager.AppSettings.Set("FIRST_LAUNCH", "false");
+            config.AppSettings.Settings["FIRST_LAUNCH"].Value = "false";
+            config.Save(ConfigurationSaveMode.Modified);
+            ConfigurationManager.RefreshSection("appSettings");
+            firstlaunch = false;
         }
         
         App.Current.MainWindow.Width = windowWidth;
@@ -180,7 +186,7 @@ public partial class MainWindow : Window
             Details = $"Watching {lview_entries.SelectedItem} {cbox_caption.SelectedItem}",
             State = lview_detail.SelectedItem.ToString(),
             Assets = new Assets() { LargeImageKey = "large_image" },
-            Buttons = new Button[] { new Button() { Label = "Get the App", Url = "https://github.com/OIL1I/WatchingRPC" } }
+            Buttons = new Button[] { new () { Label = "Get the App", Url = "https://github.com/OIL1I/WatchingRPC" } }
         });
         discordRpc.Invoke();
     }

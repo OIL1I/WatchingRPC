@@ -12,4 +12,10 @@
       <PackageReference Include="NetDiscordRpc" Version="1.0.2" />
     </ItemGroup>
 
+    <ItemGroup>
+      <None Update="App.config">
+        <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+      </None>
+    </ItemGroup>
+
 </Project>
